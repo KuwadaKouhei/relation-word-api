@@ -1,4 +1,4 @@
-# Word Relation API
+# Relation Word API
 
 単語(日本語)を渡すと関連性のある言葉・連想語を返す API。
 chiVe の日本語単語埋め込みをベースに類似語を返します。

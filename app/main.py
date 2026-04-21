@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     logger.info("shutdown")
 
 
-app = FastAPI(title="Word Relation API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Relation Word API", version="0.1.0", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(RequestLoggingMiddleware)

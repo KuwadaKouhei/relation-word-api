@@ -1,4 +1,4 @@
-# Word Relation API — クライアント統合ガイド
+# Relation Word API — クライアント統合ガイド
 
 このAPIは公開HTTPSエンドポイントとして運用しているため、任意のプロジェクト・任意の言語から呼び出せます。本ドキュメントは **新しいプロジェクトで本APIを利用する手順** を示します。
 
@@ -36,8 +36,8 @@
 
 ```ts
 const res = await fetch(
-  `${process.env.WORD_API_URL}/v1/related?word=${encodeURIComponent("猫")}&top_k=10`,
-  { headers: { "X-API-Key": process.env.WORD_API_KEY! } },
+  `${process.env.RELATION_WORD_API_URL}/v1/related?word=${encodeURIComponent("猫")}&top_k=10`,
+  { headers: { "X-API-Key": process.env.RELATION_WORD_API_KEY! } },
 );
 const data = await res.json();
 console.log(data.results);
@@ -49,9 +49,9 @@ console.log(data.results);
 import os, requests
 
 resp = requests.get(
-    f"{os.environ['WORD_API_URL']}/v1/related",
+    f"{os.environ['RELATION_WORD_API_URL']}/v1/related",
     params={"word": "猫", "top_k": 10, "pos": "名詞"},
-    headers={"X-API-Key": os.environ["WORD_API_KEY"]},
+    headers={"X-API-Key": os.environ["RELATION_WORD_API_KEY"]},
     timeout=5,
 )
 resp.raise_for_status()
@@ -61,7 +61,7 @@ print(resp.json()["results"])
 ### curl
 
 ```bash
-curl -H "X-API-Key: $WORD_API_KEY" \
+curl -H "X-API-Key: $RELATION_WORD_API_KEY" \
   "https://13-193-92-78.nip.io/v1/related?word=猫&top_k=10&pos=名詞"
 ```
 
@@ -69,7 +69,7 @@ curl -H "X-API-Key: $WORD_API_KEY" \
 
 ```bash
 enc() { printf "%s" "$1" | od -An -tx1 | tr -d ' \n' | sed 's/../%&/g'; }
-curl -H "X-API-Key: $WORD_API_KEY" \
+curl -H "X-API-Key: $RELATION_WORD_API_KEY" \
   "https://13-193-92-78.nip.io/v1/related?word=$(enc 猫)&top_k=5"
 ```
 
@@ -126,4 +126,4 @@ curl -H "X-API-Key: $WORD_API_KEY" \
 → APIキーが無効化されている可能性。`./scripts/manage-api-keys.sh list` で有効なキーを確認
 
 **429 が頻発する**
-→ デフォルト 30/分 は控えめ。大量アクセス予定なら `.env.prod` の `RATE_LIMIT_DEFAULT` を変更(例: `300/minute`)して `systemctl restart word-api`
+→ デフォルト 30/分 は控えめ。大量アクセス予定なら `.env.prod` の `RATE_LIMIT_DEFAULT` を変更(例: `300/minute`)して `systemctl restart relation-word-api`

@@ -1,5 +1,5 @@
 [project]
-name = "word-api"
+name = "relation-word-api"
 version = "0.1.0"
 description = "Related-words API backed by word embeddings (chiVe / fastText)"
 requires-python = ">=3.11"

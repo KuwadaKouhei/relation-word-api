@@ -1,4 +1,4 @@
-import type { RelatedResponse } from "@/lib/word-api";
+import type { RelatedResponse } from "@/lib/relation-word-api";
 
 export type ClientOptions = {
   top_k: number;

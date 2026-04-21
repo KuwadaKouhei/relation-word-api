@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchRelated } from "@/lib/word-api";
+import { fetchRelated } from "@/lib/relation-word-api";
 
 export const dynamic = "force-dynamic";
 

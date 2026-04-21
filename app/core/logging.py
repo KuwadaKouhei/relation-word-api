@@ -19,4 +19,4 @@ def configure_logging() -> None:
     )
 
 
-logger = structlog.get_logger("word-api")
+logger = structlog.get_logger("relation-word-api")

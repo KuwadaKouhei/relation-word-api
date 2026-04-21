@@ -29,17 +29,17 @@
 
 ```bash
 aws ec2 create-security-group \
-  --group-name word-api-sg \
-  --description "word-api public" \
+  --group-name relation-word-api-sg \
+  --description "relation-word-api public" \
   --region ap-northeast-1
 
 # 22 (SSH, 自分のIPのみ) / 80 (Let's Encrypt) / 443 (HTTPS)
 MY_IP=$(curl -s https://checkip.amazonaws.com)
-aws ec2 authorize-security-group-ingress --group-name word-api-sg \
+aws ec2 authorize-security-group-ingress --group-name relation-word-api-sg \
   --protocol tcp --port 22 --cidr "${MY_IP}/32"
-aws ec2 authorize-security-group-ingress --group-name word-api-sg \
+aws ec2 authorize-security-group-ingress --group-name relation-word-api-sg \
   --protocol tcp --port 80 --cidr 0.0.0.0/0
-aws ec2 authorize-security-group-ingress --group-name word-api-sg \
+aws ec2 authorize-security-group-ingress --group-name relation-word-api-sg \
   --protocol tcp --port 443 --cidr 0.0.0.0/0
 ```
 
@@ -66,10 +66,10 @@ aws ec2 run-instances \
   --image-id "$AMI_ID" \
   --instance-type t4g.large \
   --key-name <YOUR_KEY_NAME> \
-  --security-groups word-api-sg \
+  --security-groups relation-word-api-sg \
   --block-device-mappings 'DeviceName=/dev/xvda,Ebs={VolumeSize=30,VolumeType=gp3}' \
   --user-data file://cloud-init.yaml \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=word-api}]' \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=relation-word-api}]' \
   --region ap-northeast-1
 ```
 
@@ -78,8 +78,8 @@ aws ec2 run-instances \
 ### 3. ローカル環境変数設定
 
 ```bash
-export WORD_API_INSTANCE_ID=i-xxxxxxxxxxxxxxxxx
-export WORD_API_SSH_KEY=~/.ssh/word-api.pem
+export RELATION_WORD_API_INSTANCE_ID=i-xxxxxxxxxxxxxxxxx
+export RELATION_WORD_API_SSH_KEY=~/.ssh/relation-word-api.pem
 export AWS_REGION=ap-northeast-1
 ```
 
@@ -102,18 +102,18 @@ export AWS_REGION=ap-northeast-1
 
 ```bash
 # S3 バケット作成
-aws s3 mb s3://my-word-api-models --region ap-northeast-1
+aws s3 mb s3://my-relation-word-api-models --region ap-northeast-1
 
 # ローカルからアップロード
-aws s3 sync ./models s3://my-word-api-models/models \
+aws s3 sync ./models s3://my-relation-word-api-models/models \
   --exclude "*" --include "chive-1.3-mc5*"
 
 # EC2 にログインして S3 から同期
 ./deploy/ec2.sh ssh
 # --- 以下は EC2 内 ---
-cd word-api
+cd relation-word-api
 aws configure  # EC2ロール無し運用なら一時的にキー入れる(後述 IAM Role を推奨)
-aws s3 sync s3://my-word-api-models/models ./models
+aws s3 sync s3://my-relation-word-api-models/models ./models
 exit
 ```
 
@@ -122,13 +122,13 @@ exit
 ### 3. アプリソース転送
 
 ```bash
-DNS=$(aws ec2 describe-instances --instance-ids "$WORD_API_INSTANCE_ID" \
+DNS=$(aws ec2 describe-instances --instance-ids "$RELATION_WORD_API_INSTANCE_ID" \
         --query 'Reservations[0].Instances[0].PublicDnsName' --output text)
 
 # モデル以外を rsync で転送
-rsync -avz -e "ssh -i $WORD_API_SSH_KEY" \
+rsync -avz -e "ssh -i $RELATION_WORD_API_SSH_KEY" \
   --exclude models --exclude __pycache__ --exclude .venv --exclude .env \
-  ./ "ec2-user@${DNS}:~/word-api/"
+  ./ "ec2-user@${DNS}:~/relation-word-api/"
 ```
 
 ### 4. 本番 .env 作成
@@ -136,7 +136,7 @@ rsync -avz -e "ssh -i $WORD_API_SSH_KEY" \
 ```bash
 ./deploy/ec2.sh ssh
 # --- EC2 内 ---
-cd word-api
+cd relation-word-api
 cp .env.prod.example .env.prod
 
 # API キー生成
@@ -155,10 +155,10 @@ echo "DOMAIN=${IP}.nip.io" >> .env.prod
 
 ```bash
 # --- EC2 内(継続) ---
-sudo cp deploy/word-api.service /etc/systemd/system/
+sudo cp deploy/relation-word-api.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable word-api
-sudo systemctl start word-api
+sudo systemctl enable relation-word-api
+sudo systemctl start relation-word-api
 
 # 起動確認(初回はモデルロードに 1-2 分)
 docker compose -f docker-compose.prod.yml logs -f api
@@ -208,7 +208,7 @@ EventBridge で「毎日深夜 0:00 に停止」を設定すると消し忘れ�
 ```bash
 # 保存予定スケジュール(cron 形式・UTC)
 # 日本時間 0:00 = UTC 15:00
-aws scheduler create-schedule --name word-api-auto-stop \
+aws scheduler create-schedule --name relation-word-api-auto-stop \
   --schedule-expression 'cron(0 15 * * ? *)' \
   --target '{"Arn":"arn:aws:scheduler:::aws-sdk:ec2:stopInstances","RoleArn":"<ROLE_ARN>","Input":"{\"InstanceIds\":[\"i-xxx\"]}"}' \
   --flexible-time-window '{"Mode":"OFF"}'
@@ -222,17 +222,17 @@ aws scheduler create-schedule --name word-api-auto-stop \
 
 ```bash
 ./deploy/ec2.sh start   # まだ停止中なら起動
-DNS=$(aws ec2 describe-instances --instance-ids "$WORD_API_INSTANCE_ID" \
+DNS=$(aws ec2 describe-instances --instance-ids "$RELATION_WORD_API_INSTANCE_ID" \
         --query 'Reservations[0].Instances[0].PublicDnsName' --output text)
 
 # コード転送(モデルは再送不要)
-rsync -avz -e "ssh -i $WORD_API_SSH_KEY" \
+rsync -avz -e "ssh -i $RELATION_WORD_API_SSH_KEY" \
   --exclude models --exclude __pycache__ --exclude .venv --exclude .env \
-  ./ "ec2-user@${DNS}:~/word-api/"
+  ./ "ec2-user@${DNS}:~/relation-word-api/"
 
 # 再ビルド & 再起動
 ./deploy/ec2.sh ssh
-cd word-api
+cd relation-word-api
 docker compose -f docker-compose.prod.yml up -d --build api
 ```
 

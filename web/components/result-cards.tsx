@@ -1,6 +1,6 @@
 "use client";
 
-import type { RelatedItem, RelatedResponse } from "@/lib/word-api";
+import type { RelatedItem, RelatedResponse } from "@/lib/relation-word-api";
 
 type Props = {
   response: RelatedResponse | null;

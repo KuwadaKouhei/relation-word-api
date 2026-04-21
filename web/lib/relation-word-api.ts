@@ -40,9 +40,9 @@ function buildUrl(base: string, path: string, params: Record<string, string>) {
 }
 
 export async function fetchRelated(params: RelatedParams): Promise<RelatedResponse> {
-  const base = process.env.WORD_API_URL;
-  const key = process.env.WORD_API_KEY;
-  if (!base || !key) throw new Error("WORD_API_URL / WORD_API_KEY not configured");
+  const base = process.env.RELATION_WORD_API_URL;
+  const key = process.env.RELATION_WORD_API_KEY;
+  if (!base || !key) throw new Error("RELATION_WORD_API_URL / RELATION_WORD_API_KEY not configured");
 
   const query: Record<string, string> = {
     word: params.word,
@@ -64,7 +64,7 @@ export async function fetchRelated(params: RelatedParams): Promise<RelatedRespon
     try {
       detail = JSON.parse(body);
     } catch {}
-    const err = new Error(`word-api ${res.status}`) as Error & { status: number; detail: unknown };
+    const err = new Error(`relation-word-api ${res.status}`) as Error & { status: number; detail: unknown };
     err.status = res.status;
     err.detail = detail;
     throw err;

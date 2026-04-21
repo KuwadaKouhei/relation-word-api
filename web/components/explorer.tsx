@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { RelatedItem, RelatedResponse } from "@/lib/word-api";
+import type { RelatedItem, RelatedResponse } from "@/lib/relation-word-api";
 import { searchRelated, type ClientOptions } from "@/lib/client-api";
 import { SearchBar } from "./search-bar";
 import { OptionsPanel } from "./options-panel";
@@ -79,8 +79,8 @@ export function Explorer() {
     if (!error) return null;
     if (error === "word_not_in_vocab") return "その単語は語彙に含まれていません。別の表記で試してください。";
     if (error === "model_not_loaded") return "モデル読み込み中です。少し待って再試行してください。";
-    if (error.startsWith("word-api 5")) return "APIサーバーがエラーを返しました。時間をおいて再試行してください。";
-    if (error.startsWith("word-api 4")) return "リクエストが不正です。";
+    if (error.startsWith("relation-word-api 5")) return "APIサーバーがエラーを返しました。時間をおいて再試行してください。";
+    if (error.startsWith("relation-word-api 4")) return "リクエストが不正です。";
     return error;
   }, [error]);
 

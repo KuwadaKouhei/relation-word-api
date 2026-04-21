@@ -33,7 +33,7 @@ runcmd:
   - swapon /swapfile
   - bash -c 'echo "/swapfile swap swap defaults 0 0" >> /etc/fstab'
   # app dir
-  - mkdir -p /home/ec2-user/word-api
-  - chown ec2-user:ec2-user /home/ec2-user/word-api
+  - mkdir -p /home/ec2-user/relation-word-api
+  - chown ec2-user:ec2-user /home/ec2-user/relation-word-api
   # placeholder systemd unit — enabled AFTER source/model sync
-  - touch /home/ec2-user/word-api/.provisioned
+  - touch /home/ec2-user/relation-word-api/.provisioned

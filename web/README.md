@@ -1,6 +1,6 @@
 # 関連語エクスプローラー (Web)
 
-chiVe 日本語単語埋め込みをベースにした `word-api` のフロントエンド。
+chiVe 日本語単語埋め込みをベースにした `relation-word-api` のフロントエンド。
 Next.js 16 + React 19 + Tailwind CSS v4。
 
 ## 特徴
@@ -14,7 +14,7 @@ Next.js 16 + React 19 + Tailwind CSS v4。
 
 ```bash
 cp .env.local.example .env.local
-# .env.local を編集して WORD_API_URL / WORD_API_KEY を設定
+# .env.local を編集して RELATION_WORD_API_URL / RELATION_WORD_API_KEY を設定
 
 npm install
 npm run dev
@@ -26,14 +26,14 @@ npm run dev
 
 | 変数 | 必須 | 用途 |
 | --- | --- | --- |
-| `WORD_API_URL` | ✓ | word-api のベース URL(例: `https://api.example.com`) |
-| `WORD_API_KEY` | ✓ | word-api が発行した API キー。サーバーサイドのみ参照 |
+| `RELATION_WORD_API_URL` | ✓ | relation-word-api のベース URL(例: `https://api.example.com`) |
+| `RELATION_WORD_API_KEY` | ✓ | relation-word-api が発行した API キー。サーバーサイドのみ参照 |
 
 ## ディレクトリ
 
 ```
 app/
-├── api/related/route.ts   # word-api へのプロキシ Route Handler
+├── api/related/route.ts   # relation-word-api へのプロキシ Route Handler
 ├── layout.tsx             # ルートレイアウト(ダークテーマ)
 └── page.tsx               # トップページ(サーバーコンポーネント)
 components/
@@ -43,7 +43,7 @@ components/
 ├── result-cards.tsx       # 関連語カードグリッド
 └── history.tsx            # 検索履歴サイドバー
 lib/
-├── word-api.ts            # サーバーサイド用 fetcher + 型
+├── relation-word-api.ts   # サーバーサイド用 fetcher + 型
 └── client-api.ts          # ブラウザ → /api/related クライアント
 ```
 
@@ -55,22 +55,22 @@ lib/
 
 ```bash
 npx vercel --cwd . link
-npx vercel --cwd . env add WORD_API_URL production
-npx vercel --cwd . env add WORD_API_KEY production
+npx vercel --cwd . env add RELATION_WORD_API_URL production
+npx vercel --cwd . env add RELATION_WORD_API_KEY production
 npx vercel --cwd . deploy --prod
 ```
 
 または `vercel.com` のコンソールから:
 
 1. New Project → このリポジトリを import
-2. **Root Directory** を `web` に設定(word-api モノレポなので重要)
+2. **Root Directory** を `web` に設定(relation-word-api モノレポなので重要)
 3. Framework Preset: **Next.js**(自動検出)
 4. Environment Variables:
-   - `WORD_API_URL` = `https://<your-nip.io-domain>`
-   - `WORD_API_KEY` = `<your-api-key>`
+   - `RELATION_WORD_API_URL` = `https://<your-nip.io-domain>`
+   - `RELATION_WORD_API_KEY` = `<your-api-key>`
 5. Deploy
 
 ### 2. 注意
 
-- word-api が **EC2 断続稼働** の場合、EC2 停止中はフロントから叩いても 502/504 になります
-- EC2 の Public IP が変わるたびに `WORD_API_URL` の再設定が必要(Elastic IP 化を検討)
+- relation-word-api が **EC2 断続稼働** の場合、EC2 停止中はフロントから叩いても 502/504 になります
+- EC2 の Public IP が変わるたびに `RELATION_WORD_API_URL` の再設定が必要(Elastic IP 化を検討)
