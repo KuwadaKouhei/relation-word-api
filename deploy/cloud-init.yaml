@@ -1,0 +1,39 @@
+#cloud-config
+# EC2 初回起動時に Docker / Compose / systemd サービスをセットアップする。
+# Amazon Linux 2023 (t4g.* / t3.* 両対応) を想定。
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker
+  - git
+
+runcmd:
+  # docker
+  - systemctl enable --now docker
+  - usermod -aG docker ec2-user
+  # docker compose plugin
+  - |
+    set -e
+    DOCKER_CLI_DIR=/usr/libexec/docker/cli-plugins
+    mkdir -p "$DOCKER_CLI_DIR"
+    ARCH=$(uname -m)
+    case "$ARCH" in
+      aarch64) COMPOSE_ARCH=linux-aarch64 ;;
+      x86_64)  COMPOSE_ARCH=linux-x86_64 ;;
+    esac
+    curl -fsSL -o "$DOCKER_CLI_DIR/docker-compose" \
+      "https://github.com/docker/compose/releases/latest/download/docker-compose-${COMPOSE_ARCH}"
+    chmod +x "$DOCKER_CLI_DIR/docker-compose"
+  # swap for memory safety during model load (2GB)
+  - fallocate -l 2G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - bash -c 'echo "/swapfile swap swap defaults 0 0" >> /etc/fstab'
+  # app dir
+  - mkdir -p /home/ec2-user/word-api
+  - chown ec2-user:ec2-user /home/ec2-user/word-api
+  # placeholder systemd unit — enabled AFTER source/model sync
+  - touch /home/ec2-user/word-api/.provisioned

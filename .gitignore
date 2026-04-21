@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.local
+.env.prod
+*.pem
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+models/
+
+# Node / Next.js (web/)
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts

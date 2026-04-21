@@ -1,0 +1,24 @@
+{
+	admin off
+}
+
+{$DOMAIN} {
+	encode gzip zstd
+
+	@blocked {
+		path /.env /wp-admin* /phpmyadmin* /admin.php
+	}
+	respond @blocked 404
+
+	reverse_proxy api:8000 {
+		header_up X-Forwarded-For {http.request.remote.host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Real-IP {http.request.remote.host}
+		flush_interval -1
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

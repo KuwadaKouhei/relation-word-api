@@ -1,0 +1,50 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MODEL_JA_PATH: /models/chive-1.3-mc5_gensim/chive-1.3-mc5.kv
+      ANN_INDEX_PATH: /models/chive-1.3-mc5_gensim/chive-1.3-mc5.ann.bin
+      ANN_LABELS_PATH: /models/chive-1.3-mc5_gensim/chive-1.3-mc5.labels.npy
+      APP_ENV: production
+    volumes:
+      - ./models:/models:ro
+    expose:
+      - "8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+
+volumes:
+  redis-data:
+  caddy-data:
+  caddy-config:
